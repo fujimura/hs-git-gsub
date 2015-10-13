@@ -8,12 +8,14 @@ import qualified Data.Text.IO     as T
 import           System.Directory (doesDirectoryExist, getDirectoryContents)
 import           System.Exit
 import           System.FilePath  (getSearchPath)
-import           System.IO        (hClose)
+import           System.IO        (BufferMode (NoBuffering), hClose,
+                                   hSetBuffering, stdin)
 import           System.IO.Temp   (withSystemTempFile)
 import           System.Process   (callProcess, readProcessWithExitCode)
 
 run :: String -> String -> Maybe FilePath -> IO ()
 run from to path = do
+  hSetBuffering stdin NoBuffering
   targets <- getTargetFiles from path
   mapM_ (substitute' from to) targets
 
