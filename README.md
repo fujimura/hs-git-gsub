@@ -1,4 +1,4 @@
-# hs-git-gsub
+# hs-git-gsub [![Circle CI](https://circleci.com/gh/fujimura/hs-git-gsub.svg?style=shield)](https://circleci.com/gh/fujimura/hs-git-gsub)
 
 A Git subcommand to do gsub in a repository
 
