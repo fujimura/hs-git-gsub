@@ -45,4 +45,4 @@ substitute' from to file = do
      putStrLn diff
      putStrLn "Apply this change?(y/n)"
      answer <- getChar
-     when (answer == 'y') $ T.replace (T.pack from) (T.pack to) <$> T.readFile file >>= T.writeFile file
+     when (answer == 'y') $ T.writeFile file changed
