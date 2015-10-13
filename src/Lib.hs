@@ -38,7 +38,7 @@ substitute' :: String -> -- From
 substitute' from to file = do
    original <- T.readFile file
    let changed = T.replace (T.pack from) (T.pack to) original
-   withSystemTempFile (file ++ ".") $ \tmpFile hFile -> do
+   withSystemTempFile ("git-gsub" ++ ".") $ \tmpFile hFile -> do
      T.hPutStr hFile changed
      hClose hFile
      (_,diff,_) <- readProcessWithExitCode "git" ["diff", "--no-index", "--color", file, tmpFile] []
