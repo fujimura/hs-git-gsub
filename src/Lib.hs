@@ -43,6 +43,6 @@ substitute' from to file = do
      hClose hFile
      (_,diff,_) <- readProcessWithExitCode "git" ["diff", "--no-index", "--color", file, tmpFile] []
      putStrLn diff
-     putStrLn "Apply this change?(y/n)"
+     putStrLn "Apply this change?(y|Enter/n)"
      answer <- getChar
-     when (answer == 'y') $ T.writeFile file changed
+     when (answer `elem` "y\n") $ T.writeFile file changed
