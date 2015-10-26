@@ -1,3 +1,4 @@
+{-# LANGUAGE NamedFieldPuns #-}
 module Lib where
 
 import           Control.Monad
@@ -13,11 +14,14 @@ import           System.IO        (BufferMode (NoBuffering), hClose,
 import           System.IO.Temp   (withSystemTempFile)
 import           System.Process   (callProcess, readProcessWithExitCode)
 
-run :: String -> String -> Maybe FilePath -> IO ()
-run from to path = do
+import           Types
+
+run :: Options -> IO ()
+run Options {from, to, path, interactive}= do
   hSetBuffering stdin NoBuffering
   targets <- getTargetFiles from path
-  mapM_ (substitute' from to) targets
+  if interactive then mapM_ (substituteInteractive from to) targets
+                 else mapM_ (substitute from to) targets
 
 getTargetFiles :: String -> Maybe FilePath -> IO [FilePath]
 getTargetFiles from path = do
@@ -31,11 +35,11 @@ substitute :: String -> -- From
 substitute from to file =
     T.replace (T.pack from) (T.pack to) <$> T.readFile file >>= T.writeFile file
 
-substitute' :: String -> -- From
-              String -> -- To
-              FilePath -> -- File
-              IO ()
-substitute' from to file = do
+substituteInteractive :: String ->   -- From
+                         String ->   -- To
+                         FilePath -> -- File
+                         IO ()
+substituteInteractive from to file = do
    original <- T.readFile file
    let changed = T.replace (T.pack from) (T.pack to) original
    withSystemTempFile ("git-gsub" ++ ".") $ \tmpFile hFile -> do
