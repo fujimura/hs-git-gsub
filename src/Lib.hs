@@ -2,17 +2,13 @@
 module Lib where
 
 import           Control.Monad
-import           Data.Maybe       (maybeToList)
-import           Data.Text        (Text)
-import qualified Data.Text        as T
-import qualified Data.Text.IO     as T
-import           System.Directory (doesDirectoryExist, getDirectoryContents)
-import           System.Exit
-import           System.FilePath  (getSearchPath)
-import           System.IO        (BufferMode (NoBuffering), hClose,
-                                   hSetBuffering, stdin)
-import           System.IO.Temp   (withSystemTempFile)
-import           System.Process   (callProcess, readProcessWithExitCode)
+import           Data.Maybe      (maybeToList)
+import qualified Data.Text       as T
+import qualified Data.Text.IO    as T
+import           System.IO       (BufferMode (NoBuffering), hClose,
+                                  hSetBuffering, stdin)
+import           System.IO.Temp  (withSystemTempFile)
+import           System.Process  (readProcessWithExitCode)
 
 import           Types
 

@@ -4,16 +4,11 @@
 
 module Helper where
 
-import           Control.Monad
 import           Data.String.Interpolate
-import           Data.String.Interpolate.Util
-import           System.Directory
-import           System.Exit
-import           System.FilePath
-import           System.IO
-import           System.IO.Silently           (capture, hSilence)
-import           System.Process
-import           Test.Hspec
+import           Data.String.Interpolate.Util (unindent)
+import           System.Directory             (createDirectoryIfMissing)
+import           System.FilePath              (takeDirectory)
+import           System.Process               (system)
 import           Test.Mockery.Directory       (inTempDirectory)
 
 inTempRepo :: IO a -> IO a

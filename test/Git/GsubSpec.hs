@@ -5,11 +5,9 @@ module Git.GsubSpec ( main, spec ) where
 import qualified Cli
 import           Helper
 
-import           Control.Monad
 import           System.IO                    (stdout)
-import           System.IO.Silently           (capture, hSilence)
+import           System.IO.Silently           (hSilence)
 import           Test.Hspec
-import           Test.Mockery.Directory
 
 main :: IO ()
 main = hspec spec

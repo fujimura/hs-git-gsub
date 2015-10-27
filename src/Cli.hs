@@ -2,7 +2,6 @@ module Cli where
 
 import           Data.Version        (showVersion)
 import           Options.Applicative
-import           System.Environment  (getArgs)
 
 import qualified Lib
 import qualified Paths_hs_git_gsub
