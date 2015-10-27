@@ -3,10 +3,10 @@
 module Git.GsubSpec ( main, spec ) where
 
 import qualified Cli
-import           Helper
 
-import           System.IO                    (stdout)
-import           System.IO.Silently           (hSilence)
+import           Helper
+import           System.IO          (stdout)
+import           System.IO.Silently (hSilence)
 import           Test.Hspec
 
 main :: IO ()
@@ -27,3 +27,8 @@ spec = do
 
       actual' <- readFile "foo.rb"
       actual' `shouldNotContain` "def bar"
+
+    it "should substitute interactively" $ do
+      runWithStdin "y" $ Cli.run ["-i", "foo", "bar"]
+      actual <- readFile "foo.rb"
+      actual `shouldContain` "def bar"
