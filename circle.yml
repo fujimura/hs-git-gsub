@@ -10,5 +10,8 @@ dependencies:
     - stack build
 
 test:
+  pre:
+    - git config --global user.email "john@example.com"
+    - git config --global user.name "John Doe"
   override:
     - stack test
