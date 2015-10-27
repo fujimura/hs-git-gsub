@@ -8,6 +8,7 @@ dependencies:
   override:
     - stack setup
     - stack build
+    - stack build --test --only-dependencies
 
 test:
   pre:
