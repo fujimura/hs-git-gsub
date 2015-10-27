@@ -1,6 +1,7 @@
 module Main where
 
 import qualified Cli
+import           System.Environment (getArgs)
 
 main :: IO ()
-main = Cli.run
+main = getArgs >>= Cli.run

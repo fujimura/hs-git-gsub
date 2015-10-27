@@ -1,18 +1,15 @@
 module Cli where
 
+import           Data.Version        (showVersion)
 import           Options.Applicative
 import           System.Environment  (getArgs)
-import           Data.Version        (showVersion)
 
 import qualified Lib
 import qualified Paths_hs_git_gsub
 import           Types
 
-run :: IO ()
-run = getArgs >>= run'
-
-run' :: [String] -> IO ()
-run' xs = Cli.parseArgs xs >>= Lib.run
+run :: [String] -> IO ()
+run xs = Cli.parseArgs xs >>= Lib.run
 
 parseArgs :: [String] -> IO Options
 parseArgs args = handleParseResult (execParserPure (prefs idm) opts args)
