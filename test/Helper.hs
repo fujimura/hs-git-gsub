@@ -12,7 +12,6 @@ import           System.Directory             (createDirectoryIfMissing)
 import           System.FilePath              (takeDirectory)
 import           System.IO                    (IOMode (ReadMode), hClose,
                                                hPutStrLn, openFile, stdin)
-import           System.IO
 import           System.IO.Temp               (withSystemTempFile)
 import           System.Process               (system)
 import           Test.Mockery.Directory       (inTempDirectory)

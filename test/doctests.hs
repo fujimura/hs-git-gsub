@@ -1,4 +1,3 @@
-import           Control.Applicative
 import           System.Process
 import           Test.DocTest
 
