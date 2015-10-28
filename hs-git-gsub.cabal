@@ -71,4 +71,6 @@ test-suite doctests
         doctest >=0.8,
         process -any
     hs-source-dirs: src test
+    other-modules:
+        Paths_hs_git_gsub
     ghc-options: -threaded -rtsopts -with-rtsopts=-N -fno-warn-unused-do-bind -Wall
