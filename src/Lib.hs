@@ -1,4 +1,5 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Lib where
 
@@ -13,15 +14,18 @@ import System.IO
   )
 import System.IO.Temp (withSystemTempFile)
 import System.Process (readProcessWithExitCode)
+import Text.RE.Replace (replaceAll)
+import Text.RE.TDFA.Text (RE, compileRegex, (*=~))
 import Types
 
 run :: Options -> IO ()
 run Options {from, to, path, interactive} = do
   hSetBuffering stdin NoBuffering
   targets <- getTargetFiles from path
+  re <- compileRegex from
   if interactive
-    then mapM_ (substituteInteractive from to) targets
-    else mapM_ (substitute from to) targets
+    then mapM_ (substituteInteractive re to) targets
+    else mapM_ (substitute re to) targets
 
 getTargetFiles :: String -> FilePath -> IO [FilePath]
 getTargetFiles from path = do
@@ -29,21 +33,23 @@ getTargetFiles from path = do
   return (lines result)
 
 substitute ::
-  String -> -- From
+  RE -> -- From
   String -> -- To
   FilePath -> -- File
   IO ()
-substitute from to file =
-  T.replace (T.pack from) (T.pack to) <$> T.readFile file >>= T.writeFile file
+substitute re to file = do
+  content <- T.readFile file
+  let newContent :: T.Text = replaceAll (T.pack to) (content *=~ re)
+  T.writeFile file newContent
 
 substituteInteractive ::
-  String -> -- From
+  RE -> -- From
   String -> -- To
   FilePath -> -- File
   IO ()
-substituteInteractive from to file = do
+substituteInteractive re to file = do
   original <- T.readFile file
-  let changed = T.replace (T.pack from) (T.pack to) original
+  let changed :: T.Text = replaceAll (T.pack to) (original *=~ re)
   withSystemTempFile ("git-gsub" ++ ".") $ \tmpFile hFile -> do
     T.hPutStr hFile changed
     hClose hFile

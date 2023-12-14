@@ -22,6 +22,11 @@ spec = around_ (hSilence [stdout] . inTempRepo) $ do
     actual <- readFile "foo.rb"
     actual `shouldContain` "def bar"
 
+  it "should substitute using regular expression" $ do
+    Cli.run ["f.o", "bar"]
+    actual <- readFile "foo.rb"
+    actual `shouldContain` "def bar"
+
   it "can specify directory" $ do
     Cli.run ["foo", "bar", "foo"]
     actual <- readFile "foo/bar.rb"
