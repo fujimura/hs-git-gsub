@@ -3,7 +3,6 @@
 module Lib where
 
 import Control.Monad
-import Data.Maybe (maybeToList)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import System.IO
@@ -24,9 +23,9 @@ run Options {from, to, path, interactive} = do
     then mapM_ (substituteInteractive from to) targets
     else mapM_ (substitute from to) targets
 
-getTargetFiles :: String -> Maybe FilePath -> IO [FilePath]
+getTargetFiles :: String -> FilePath -> IO [FilePath]
 getTargetFiles from path = do
-  (_, result, _) <- readProcessWithExitCode "git" (["grep", "-l", from] ++ maybeToList path) []
+  (_, result, _) <- readProcessWithExitCode "git" (["grep", "-l", from, path]) []
   return (lines result)
 
 substitute ::
