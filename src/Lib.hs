@@ -3,13 +3,13 @@
 
 module Lib where
 
+import Control.Concurrent.Async (mapConcurrently_)
 import Control.Monad
 import qualified Data.ByteString as BS
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
 import System.Directory (doesFileExist)
-import System.Environment (lookupEnv)
 import System.IO
   ( BufferMode (NoBuffering),
     hClose,
@@ -30,7 +30,7 @@ run Options {from, to, path, interactive} = do
   let to' = T.pack to
   if interactive
     then mapM_ (substituteInteractive re to') targets
-    else mapM_ (substitute re to') targets
+    else mapConcurrently_ (substitute re to') targets
 
 getTargetFiles :: FilePath -> IO [FilePath]
 getTargetFiles path = do
