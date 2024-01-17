@@ -1,6 +1,6 @@
 dist
+dist-newstyle
 *.o
 *.hi
 *.chi
 *.chs.h
-.stack-work/
