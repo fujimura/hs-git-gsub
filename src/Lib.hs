@@ -4,7 +4,9 @@
 module Lib where
 
 import Control.Monad
+import qualified Data.ByteString as BS
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
 import System.IO
   ( BufferMode (NoBuffering),
@@ -39,9 +41,12 @@ substitute ::
   FilePath -> -- File
   IO ()
 substitute re to file = do
-  content <- T.readFile file
-  let newContent :: T.Text = replaceAll to (content *=~ re)
-  T.writeFile file newContent
+  b <- BS.readFile file
+  case T.decodeUtf8' b of
+    Left _ -> return ()
+    Right content -> do
+      let newContent :: T.Text = replaceAll to (content *=~ re)
+      T.writeFile file newContent
 
 substituteInteractive ::
   RE -> -- From
