@@ -21,16 +21,16 @@ import Types
 run :: Options -> IO ()
 run Options {from, to, path, interactive} = do
   hSetBuffering stdin NoBuffering
-  targets <- getTargetFiles from path
+  targets <- getTargetFiles path
   re <- compileRegex from
   let to' = T.pack to
   if interactive
     then mapM_ (substituteInteractive re to') targets
     else mapM_ (substitute re to') targets
 
-getTargetFiles :: String -> FilePath -> IO [FilePath]
-getTargetFiles from path = do
-  (_, result, _) <- readProcessWithExitCode "git" (["grep", "-l", from, path]) []
+getTargetFiles :: FilePath -> IO [FilePath]
+getTargetFiles path = do
+  (_, result, _) <- readProcessWithExitCode "git" ["ls-files", path] []
   return (lines result)
 
 substitute ::
