@@ -23,9 +23,10 @@ run Options {from, to, path, interactive} = do
   hSetBuffering stdin NoBuffering
   targets <- getTargetFiles from path
   re <- compileRegex from
+  let to' = T.pack to
   if interactive
-    then mapM_ (substituteInteractive re to) targets
-    else mapM_ (substitute re to) targets
+    then mapM_ (substituteInteractive re to') targets
+    else mapM_ (substitute re to') targets
 
 getTargetFiles :: String -> FilePath -> IO [FilePath]
 getTargetFiles from path = do
@@ -34,22 +35,22 @@ getTargetFiles from path = do
 
 substitute ::
   RE -> -- From
-  String -> -- To
+  T.Text -> -- To
   FilePath -> -- File
   IO ()
 substitute re to file = do
   content <- T.readFile file
-  let newContent :: T.Text = replaceAll (T.pack to) (content *=~ re)
+  let newContent :: T.Text = replaceAll to (content *=~ re)
   T.writeFile file newContent
 
 substituteInteractive ::
   RE -> -- From
-  String -> -- To
+  T.Text -> -- To
   FilePath -> -- File
   IO ()
 substituteInteractive re to file = do
   original <- T.readFile file
-  let changed :: T.Text = replaceAll (T.pack to) (original *=~ re)
+  let changed :: T.Text = replaceAll to (original *=~ re)
   withSystemTempFile ("git-gsub" ++ ".") $ \tmpFile hFile -> do
     T.hPutStr hFile changed
     hClose hFile
