@@ -11,6 +11,7 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
 import System.Directory (doesFileExist)
+import System.FilePath ((</>))
 import System.IO
   ( BufferMode (NoBuffering),
     hClose,
@@ -38,7 +39,11 @@ run Options {from, to, path, interactive} = do
 getTargetFiles :: FilePath -> IO [FilePath]
 getTargetFiles path = do
   (_, result, _) <- readProcessWithExitCode "git" ["ls-files", path] []
-  return (lines result)
+  (_, pwd, _) <- readProcessWithExitCode "git" ["rev-parse", "--show-toplevel"] []
+  return $ map (trim pwd </>) $ lines result
+  where
+    trim :: String -> String
+    trim = unwords . words
 
 substitute ::
   RE -> -- From
