@@ -8,6 +8,8 @@ import qualified Data.ByteString as BS
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
+import System.Directory (doesFileExist)
+import System.Environment (lookupEnv)
 import System.IO
   ( BufferMode (NoBuffering),
     hClose,
@@ -41,12 +43,14 @@ substitute ::
   FilePath -> -- File
   IO ()
 substitute re to file = do
-  b <- BS.readFile file
-  case T.decodeUtf8' b of
-    Left _ -> return ()
-    Right content -> do
-      let newContent :: T.Text = replaceAll to (content *=~ re)
-      T.writeFile file newContent
+  e <- doesFileExist file -- TODO: Test
+  when e $ do
+    b <- BS.readFile file
+    case T.decodeUtf8' b of
+      Left _ -> return ()
+      Right content -> do
+        let newContent :: T.Text = replaceAll to (content *=~ re)
+        T.writeFile file newContent
 
 substituteInteractive ::
   RE -> -- From
@@ -54,13 +58,15 @@ substituteInteractive ::
   FilePath -> -- File
   IO ()
 substituteInteractive re to file = do
-  original <- T.readFile file
-  let changed :: T.Text = replaceAll to (original *=~ re)
-  withSystemTempFile ("git-gsub" ++ ".") $ \tmpFile hFile -> do
-    T.hPutStr hFile changed
-    hClose hFile
-    (_, diff, _) <- readProcessWithExitCode "git" ["diff", "--no-index", "--color", file, tmpFile] []
-    putStrLn diff
-    putStrLn "Apply this change?(y|Enter/n)"
-    answer <- getChar
-    when (answer `elem` "y\n") $ T.writeFile file changed
+  e <- doesFileExist file -- TODO: Test
+  when e $ do
+    original <- T.readFile file
+    let changed :: T.Text = replaceAll to (original *=~ re)
+    withSystemTempFile ("git-gsub" ++ ".") $ \tmpFile hFile -> do
+      T.hPutStr hFile changed
+      hClose hFile
+      (_, diff, _) <- readProcessWithExitCode "git" ["diff", "--no-index", "--color", file, tmpFile] []
+      putStrLn diff
+      putStrLn "Apply this change?(y|Enter/n)"
+      answer <- getChar
+      when (answer `elem` "y\n") $ T.writeFile file changed
