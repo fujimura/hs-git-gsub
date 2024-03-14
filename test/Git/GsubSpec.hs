@@ -1,17 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Git.GsubSpec ( main, spec ) where
+module Git.GsubSpec (main, spec) where
 
 import qualified Cli
+import Control.Exception (catch)
+import Data.Version (showVersion)
+import Helper
 import qualified Paths_hs_git_gsub
-
-import           Control.Exception  (catch)
-import           Data.Version       (showVersion)
-import           Helper
-import           System.Exit        (ExitCode (ExitSuccess))
-import           System.IO          (stdout)
-import           System.IO.Silently (capture, hSilence)
-import           Test.Hspec
+import System.Exit (ExitCode (ExitSuccess))
+import System.IO (stdout)
+import System.IO.Silently (capture, hSilence)
+import Test.Hspec
 
 main :: IO ()
 main = hspec spec

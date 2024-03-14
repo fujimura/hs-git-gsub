@@ -1,11 +1,10 @@
 module Cli where
 
-import           Data.Version        (showVersion)
-import           Options.Applicative
-
+import Data.Version (showVersion)
 import qualified Lib
+import Options.Applicative
 import qualified Paths_hs_git_gsub
-import           Types
+import Types
 
 run :: [String] -> IO ()
 run xs = Cli.parseArgs xs >>= Lib.run
@@ -14,18 +13,25 @@ parseArgs :: [String] -> IO Options
 parseArgs args = handleParseResult (execParserPure (prefs idm) opts args)
   where
     opts :: ParserInfo Options
-    opts = info ( helper <*> (version <*> parseOptions))
-           ( fullDesc
-           <> header "Generate a haskell project based on a template from github."
-           <> progDesc "git-gsub")
-    version = infoOption (showVersion Paths_hs_git_gsub.version)
-      (  short 'v'
-      <> long "version"
-      <> help "Print version information" )
+    opts =
+      info
+        (helper <*> (version <*> parseOptions))
+        ( fullDesc
+            <> header "Generate a haskell project based on a template from github."
+            <> progDesc "git-gsub"
+        )
+    version =
+      infoOption
+        (showVersion Paths_hs_git_gsub.version)
+        ( short 'v'
+            <> long "version"
+            <> help "Print version information"
+        )
 
 parseOptions :: Parser Options
-parseOptions = Options
-   <$> argument str (help "from")
-   <*> argument str (help "to")
-   <*> optional (argument str (help "path"))
-   <*> switch (long "interactive" <> short 'i' <> help "Run interactively")
+parseOptions =
+  Options
+    <$> argument str (help "from")
+    <*> argument str (help "to")
+    <*> optional (argument str (help "path"))
+    <*> switch (long "interactive" <> short 'i' <> help "Run interactively")
