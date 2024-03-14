@@ -6,8 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ghc: ['latest']
-        cabal: ['latest']
+        ghc: ["latest"]
+        cabal: ["latest"]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Haskell
@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ghc: ['latest']
-        cabal: ['latest']
+        ghc: ["latest"]
+        cabal: ["latest"]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Haskell
@@ -45,6 +45,4 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
-      - run: |
-          cabal install ormolu
-          ormolu --mode check $(git ls-files | grep "\.hs$")
+      - uses: haskell-actions/run-ormolu@v15
