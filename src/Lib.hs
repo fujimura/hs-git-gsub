@@ -1,11 +1,15 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Lib where
 
 import Control.Monad
-import Data.Maybe (maybeToList)
+import qualified Data.ByteString as BS
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
+import System.Directory (doesFileExist)
+import System.Environment (lookupEnv)
 import System.IO
   ( BufferMode (NoBuffering),
     hClose,
@@ -14,42 +18,55 @@ import System.IO
   )
 import System.IO.Temp (withSystemTempFile)
 import System.Process (readProcessWithExitCode)
+import Text.RE.Replace (replaceAll)
+import Text.RE.TDFA.Text (RE, compileRegex, (*=~))
 import Types
 
 run :: Options -> IO ()
 run Options {from, to, path, interactive} = do
   hSetBuffering stdin NoBuffering
-  targets <- getTargetFiles from path
+  targets <- getTargetFiles path
+  re <- compileRegex from
+  let to' = T.pack to
   if interactive
-    then mapM_ (substituteInteractive from to) targets
-    else mapM_ (substitute from to) targets
+    then mapM_ (substituteInteractive re to') targets
+    else mapM_ (substitute re to') targets
 
-getTargetFiles :: String -> Maybe FilePath -> IO [FilePath]
-getTargetFiles from path = do
-  (_, result, _) <- readProcessWithExitCode "git" (["grep", "-l", from] ++ maybeToList path) []
+getTargetFiles :: FilePath -> IO [FilePath]
+getTargetFiles path = do
+  (_, result, _) <- readProcessWithExitCode "git" ["ls-files", path] []
   return (lines result)
 
 substitute ::
-  String -> -- From
-  String -> -- To
+  RE -> -- From
+  T.Text -> -- To
   FilePath -> -- File
   IO ()
-substitute from to file =
-  T.replace (T.pack from) (T.pack to) <$> T.readFile file >>= T.writeFile file
+substitute re to file = do
+  e <- doesFileExist file -- TODO: Test
+  when e $ do
+    b <- BS.readFile file
+    case T.decodeUtf8' b of
+      Left _ -> return ()
+      Right content -> do
+        let newContent :: T.Text = replaceAll to (content *=~ re)
+        T.writeFile file newContent
 
 substituteInteractive ::
-  String -> -- From
-  String -> -- To
+  RE -> -- From
+  T.Text -> -- To
   FilePath -> -- File
   IO ()
-substituteInteractive from to file = do
-  original <- T.readFile file
-  let changed = T.replace (T.pack from) (T.pack to) original
-  withSystemTempFile ("git-gsub" ++ ".") $ \tmpFile hFile -> do
-    T.hPutStr hFile changed
-    hClose hFile
-    (_, diff, _) <- readProcessWithExitCode "git" ["diff", "--no-index", "--color", file, tmpFile] []
-    putStrLn diff
-    putStrLn "Apply this change?(y|Enter/n)"
-    answer <- getChar
-    when (answer `elem` "y\n") $ T.writeFile file changed
+substituteInteractive re to file = do
+  e <- doesFileExist file -- TODO: Test
+  when e $ do
+    original <- T.readFile file
+    let changed :: T.Text = replaceAll to (original *=~ re)
+    withSystemTempFile ("git-gsub" ++ ".") $ \tmpFile hFile -> do
+      T.hPutStr hFile changed
+      hClose hFile
+      (_, diff, _) <- readProcessWithExitCode "git" ["diff", "--no-index", "--color", file, tmpFile] []
+      putStrLn diff
+      putStrLn "Apply this change?(y|Enter/n)"
+      answer <- getChar
+      when (answer `elem` "y\n") $ T.writeFile file changed
