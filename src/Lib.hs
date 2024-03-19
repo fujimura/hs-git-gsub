@@ -5,11 +5,11 @@ module Lib where
 
 import Control.Concurrent.Async (mapConcurrently_)
 import Control.Monad
-import Data.ByteString (ByteString)
-import qualified Data.ByteString as BS
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as T
-import qualified Data.Text.IO as T
+import Data.ByteString.Lazy (ByteString)
+import qualified Data.ByteString.Lazy as BS
+import qualified Data.Text.Lazy as T
+import qualified Data.Text.Lazy.Encoding as T
+import qualified Data.Text.Lazy.IO as T
 import System.Directory (doesFileExist)
 import System.FilePath ((</>))
 import System.IO
@@ -22,7 +22,7 @@ import System.IO.Temp (withSystemTempFile)
 import System.Process (readProcessWithExitCode)
 import Text.RE.Replace (replaceAll)
 import Text.RE.TDFA (reRegex)
-import Text.RE.TDFA.ByteString (RE, compileRegex, (*=~))
+import Text.RE.TDFA.ByteString.Lazy (RE, compileRegex, (*=~))
 import Text.Regex.TDFA (matchTest, (=~))
 import Types
 
@@ -55,8 +55,8 @@ substitute re to file = do
   when e $ do
     content <- BS.readFile file
     when (matchTest (reRegex re) content) $ do
-      let newContent :: BS.ByteString = replaceAll to (content *=~ re)
-      BS.writeFile file newContent
+      let newContent = replaceAll to (content *=~ re)
+      seq (BS.length newContent) (BS.writeFile file newContent)
 
 substituteInteractive ::
   RE -> -- From
