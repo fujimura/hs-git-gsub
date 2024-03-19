@@ -24,6 +24,9 @@ import Test.Mockery.Directory (inTempDirectory)
 inTempRepo :: IO a -> IO a
 inTempRepo action = inTempDirectory $ do
   system "git init ."
+  system "git config user.name \"Test User\""
+  system "git config user.email \"test@example.com\""
+
   write
     "foo.rb"
     [i|

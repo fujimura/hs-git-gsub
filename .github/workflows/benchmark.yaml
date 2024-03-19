@@ -1,0 +1,25 @@
+on: [push]
+name: benchmark
+jobs:
+  test:
+    name: Run benchmark on GHC ${{ matrix.ghc }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ghc: ["latest"]
+        cabal: ["latest"]
+    steps:
+      - uses: actions/checkout@v4
+      - run: git submodule sync
+      - run: git submodule update --init --recursive
+      - name: Setup Haskell
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: ${{ matrix.cabal }}
+      - run: cabal bench --benchmark-options="--output hs-git-gsub-benchmark-${{ github.sha }}.html"
+      - name: Upload Benchmark Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: hs-git-gsub-benchmark-${{ github.sha }}.html
