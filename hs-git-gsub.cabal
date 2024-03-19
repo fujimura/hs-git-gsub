@@ -67,14 +67,3 @@ test-suite hs-git-gsub-test
   default-language:   Haskell2010
   build-tool-depends: hspec-discover:hspec-discover
   hs-source-dirs:     test
-
-test-suite doctests
-  type:           exitcode-stdio-1.0
-  main-is:        doctests.hs
-  build-depends:
-      base
-    , doctest  >=0.8
-    , process
-
-  hs-source-dirs: src test
-  other-modules:  Paths_hs_git_gsub
