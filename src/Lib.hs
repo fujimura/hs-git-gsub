@@ -11,7 +11,7 @@ import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.Encoding as T
 import qualified Data.Text.Lazy.IO as T
 import System.Directory (createDirectoryIfMissing, doesFileExist, renameFile)
-import System.FilePath ((</>) , dropFileName)
+import System.FilePath (dropFileName)
 import System.IO
   ( BufferMode (NoBuffering),
     hClose,
@@ -37,11 +37,7 @@ run Options {from, to, path, rename} = do
 getTargetFiles :: FilePath -> IO [FilePath]
 getTargetFiles path = do
   (_, result, _) <- readProcessWithExitCode "git" ["ls-files", path] []
-  (_, pwd, _) <- readProcessWithExitCode "git" ["rev-parse", "--show-toplevel"] []
-  return $ map (trim pwd </>) $ lines result
-  where
-    trim :: String -> String
-    trim = unwords . words
+  return (lines result)
 
 processFile ::
   RE -> -- From
