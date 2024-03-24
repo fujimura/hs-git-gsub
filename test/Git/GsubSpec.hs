@@ -40,6 +40,12 @@ spec = around_ (hSilence [stdout] . inTempRepo) $ do
     actual' <- readFile "foo.rb"
     actual' `shouldNotContain` "def bar"
 
+
+  it "should rename file" $ do
+    Cli.run ["--rename", "foo", "bar"]
+    actual <- readFile "bar.rb"
+    actual `shouldContain` "def bar"
+
   it "should show version" $ do
     let run args = fst <$> (capture $ Cli.run args `catch` (\ExitSuccess -> return ()))
 
