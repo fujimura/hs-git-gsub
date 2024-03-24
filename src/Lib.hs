@@ -28,12 +28,13 @@ import Types
 
 run :: Options -> IO ()
 run Options {from, to, path, interactive} = do
-  hSetBuffering stdin NoBuffering
   targets <- getTargetFiles path
   re <- compileRegex from
   let to' = T.encodeUtf8 . T.pack $ to
   if interactive
-    then mapM_ (substituteInteractive re to') targets
+    then do
+       hSetBuffering stdin NoBuffering
+       mapM_ (substituteInteractive re to') targets
     else mapConcurrently_ (substitute re to') targets
 
 getTargetFiles :: FilePath -> IO [FilePath]
