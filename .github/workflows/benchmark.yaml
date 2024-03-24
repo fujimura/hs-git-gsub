@@ -1,4 +1,4 @@
-on: [push]
+on: [push, pull_request]
 name: benchmark
 jobs:
   benchmark:
@@ -17,9 +17,15 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
-      - run: cabal bench --benchmark-options="--output hs-git-gsub-benchmark-${{ github.sha }}.html"
+      - run: cabal bench -v0 --benchmark-options="--output hs-git-gsub-benchmark-${{ github.sha }}.html" >> benchmark-results.txt
       - name: Upload Benchmark Results
         uses: actions/upload-artifact@v4
         with:
           name: benchmark-results
           path: hs-git-gsub-benchmark-${{ github.sha }}.html
+      - name: Post Benchmark Results as PR Comment
+        if: github.event_name == 'pull_request'
+        run: |
+          COMMENT_BODY="## Benchmark Results on ${{ github.sha }}\n\`\`\`\n$(cat benchmark-results.txt)\n\`\`\`"
+          POST_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" -X POST --data "{\"body\": \"$COMMENT_BODY\"}" $POST_URL
