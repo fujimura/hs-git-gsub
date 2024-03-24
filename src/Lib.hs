@@ -55,9 +55,9 @@ substitute re to file = do
   e <- doesFileExist file -- TODO: Test
   when e $ do
     content <- BS.readFile file
-    when (matchTest (reRegex re) content) $ do
-      let newContent = replaceAll to (content *=~ re)
-      seq (BS.length newContent) (BS.writeFile file newContent)
+    let newContent = replaceAll to (content *=~ re)
+    when (newContent /= content) $ do
+       seq (BS.length newContent) (BS.writeFile file newContent)
 
 substituteInteractive ::
   RE -> -- From
