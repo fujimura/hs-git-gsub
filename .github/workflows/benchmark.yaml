@@ -1,4 +1,4 @@
-on: [push, pull_request]
+on: [push]
 name: benchmark
 jobs:
   benchmark:
@@ -24,7 +24,7 @@ jobs:
           name: benchmark-results
           path: hs-git-gsub-benchmark-${{ github.sha }}.html
       - name: Post Benchmark Results as PR Comment
-        if: github.event_name == 'pull_request'
+        if: ${{ github.event.issue.pull_request }}
         run: |
           COMMENT_BODY="## Benchmark Results on ${{ github.sha }}\n\`\`\`\n$(cat benchmark-results.txt)\n\`\`\`"
           POST_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
