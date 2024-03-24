@@ -27,5 +27,5 @@ jobs:
         if: ${{ github.event.issue.pull_request }}
         run: |
           COMMENT_BODY="## Benchmark Results on ${{ github.sha }}\n\`\`\`\n$(cat benchmark-results.txt)\n\`\`\`"
-          POST_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
+          POST_URL="https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" -X POST --data "{\"body\": \"$COMMENT_BODY\"}" $POST_URL
