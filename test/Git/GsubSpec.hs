@@ -40,11 +40,6 @@ spec = around_ (hSilence [stdout] . inTempRepo) $ do
     actual' <- readFile "foo.rb"
     actual' `shouldNotContain` "def bar"
 
-  it "should substitute interactively" $ do
-    runWithStdin "y" $ Cli.run ["-i", "foo", "bar"]
-    actual <- readFile "foo.rb"
-    actual `shouldContain` "def bar"
-
   it "should show version" $ do
     let run args = fst <$> (capture $ Cli.run args `catch` (\ExitSuccess -> return ()))
 

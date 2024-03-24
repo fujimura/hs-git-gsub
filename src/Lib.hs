@@ -27,14 +27,12 @@ import Text.Regex.TDFA (matchTest, (=~))
 import Types
 
 run :: Options -> IO ()
-run Options {from, to, path, interactive} = do
+run Options {from, to, path} = do
   hSetBuffering stdin NoBuffering
   targets <- getTargetFiles path
   re <- compileRegex from
   let to' = T.encodeUtf8 . T.pack $ to
-  if interactive
-    then mapM_ (substituteInteractive re to') targets
-    else mapConcurrently_ (substitute re to') targets
+  mapConcurrently_ (substitute re to') targets
 
 getTargetFiles :: FilePath -> IO [FilePath]
 getTargetFiles path = do
@@ -57,22 +55,3 @@ substitute re to file = do
     when (matchTest (reRegex re) content) $ do
       let newContent = replaceAll to (content *=~ re)
       seq (BS.length newContent) (BS.writeFile file newContent)
-
-substituteInteractive ::
-  RE -> -- From
-  ByteString -> -- To
-  FilePath -> -- File
-  IO ()
-substituteInteractive re to file = do
-  e <- doesFileExist file -- TODO: Test
-  when e $ do
-    original <- BS.readFile file
-    let changed :: ByteString = replaceAll to (original *=~ re)
-    withSystemTempFile ("git-gsub" ++ ".") $ \tmpFile hFile -> do
-      BS.hPutStr hFile changed
-      hClose hFile
-      (_, diff, _) <- readProcessWithExitCode "git" ["diff", "--no-index", "--color", file, tmpFile] []
-      putStrLn diff
-      putStrLn "Apply this change?(y|Enter/n)"
-      answer <- getChar
-      when (answer `elem` "y\n") $ BS.writeFile file changed

@@ -34,4 +34,3 @@ parseOptions =
     <$> argument str (help "from")
     <*> argument str (help "to")
     <*> argument str (help "path" <> value "./")
-    <*> switch (long "interactive" <> short 'i' <> help "Run interactively")
