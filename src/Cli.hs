@@ -34,3 +34,4 @@ parseOptions =
     <$> argument str (help "from")
     <*> argument str (help "to")
     <*> argument str (help "path" <> value "./")
+    <*> switch (short 'r' <> long "rename" <> help "Rename files" <> help "rename")

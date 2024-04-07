@@ -10,8 +10,8 @@ import qualified Data.ByteString.Lazy as BS
 import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.Encoding as T
 import qualified Data.Text.Lazy.IO as T
-import System.Directory (doesFileExist)
-import System.FilePath ((</>))
+import System.Directory (createDirectoryIfMissing, doesFileExist, renameFile)
+import System.FilePath (dropFileName, (</>))
 import System.IO
   ( BufferMode (NoBuffering),
     hClose,
@@ -21,18 +21,21 @@ import System.IO
 import System.IO.Temp (withSystemTempFile)
 import System.Process (readProcessWithExitCode)
 import Text.RE.Replace (replaceAll)
-import Text.RE.TDFA (reRegex)
-import Text.RE.TDFA.ByteString.Lazy (RE, compileRegex, (*=~))
+import Text.RE.TDFA (RE, reRegex, (*=~))
+import qualified Text.RE.TDFA.ByteString.Lazy
+import qualified Text.RE.TDFA.String
 import Text.Regex.TDFA (matchTest, (=~))
 import Types
 
 run :: Options -> IO ()
-run Options {from, to, path} = do
+run Options {from, to, path, rename} = do
   hSetBuffering stdin NoBuffering
   targets <- getTargetFiles path
-  re <- compileRegex from
+  bsRE <- Text.RE.TDFA.ByteString.Lazy.compileRegex from
+  stringRE <- Text.RE.TDFA.String.compileRegex from
   let to' = T.encodeUtf8 . T.pack $ to
-  mapConcurrently_ (substitute re to') targets
+  mapConcurrently_ (runSubstitution bsRE to') targets
+  when rename $ mapConcurrently_ (runRename stringRE to) targets
 
 getTargetFiles :: FilePath -> IO [FilePath]
 getTargetFiles path = do
@@ -43,15 +46,27 @@ getTargetFiles path = do
     trim :: String -> String
     trim = unwords . words
 
-substitute ::
+runSubstitution ::
   RE -> -- From
   ByteString -> -- To
   FilePath -> -- File
   IO ()
-substitute re to file = do
+runSubstitution re to file = do
   e <- doesFileExist file -- TODO: Test
   when e $ do
     content <- BS.readFile file
     when (matchTest (reRegex re) content) $ do
       let newContent = replaceAll to (content *=~ re)
       seq (BS.length newContent) (BS.writeFile file newContent)
+
+runRename ::
+  RE -> -- From
+  String -> -- To
+  FilePath -> -- File
+  IO ()
+runRename re to path = do
+  e <- doesFileExist path -- TODO: Test
+  when (e && matchTest (reRegex re) path) $ do
+    let newPath = replaceAll to (path *=~ re)
+    createDirectoryIfMissing True (dropFileName newPath)
+    renameFile path newPath
